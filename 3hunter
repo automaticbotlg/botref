@@ -1,0 +1,507 @@
+$('#body').css('background', 'black');
+//$('#body').css('background', 'linear-gradient(45deg, #000000 0%, #0CE2F5 100%, #0CE2F5 100%)');
+$('#main').css('min-width', '100%');
+$('#header').css('display', 'none');
+$('#news').css('display', 'none');
+$('#content').css('background', 'none');
+$('#gameContainer').html('<br> <center><span id="notification">...</span></center><br><br> <span id="notification1">...</span><br> <span style="float: left;"><input id="basebetAmount" value="0.00000001" style="background: none; text-align: center; color: white; border: 1px solid white;" placeholder="Base Bet" autocomplete="off"> <input id="overBalance" value="0.00000000" style="background: none; text-align: center; color: white; border: 1px solid white;" placeholder="Target Balance" autocomplete="off"> <input id="underBalance" value="0.00000000" style="background: none; text-align: center; color: white; border: 1px solid white;" placeholder="Stop Lost Balance" autocomplete="off"></span><span style="float: right;"><button id="min" onclick="min();" style="border: 1px solid black; padding: 2px;">Min</button> <button id="play" style="border: 1px solid black; padding: 2px;">Start</button> <button id="reset" onclick="reset();" style="border: 1px solid black; padding: 2px;">Reset</button> <button id="showChart" style="border: 1px solid black; padding: 2px;">Show Chart</button> <button id="showStatic" style="border: 1px solid black; padding: 2px;">Show Static</button></span><br><br> <div id="static">...</div><br><br><br><div id="chart" style="height: 280px;"></div><br>');
+$('#gameContainer').css('width', '75%');
+$('#gameContainer').css('height', '100%');
+$('#gameContainer').css('color', 'white');
+$('#gameContainer').css('font-size', '16px');
+$('#gameContainer').css('margin', 'auto');
+$('#gameContainer').css('padding', '0px');
+$('#notification').html('Bot has applied!');
+$('#static').css('text-align', 'center');
+$('#controlContainer').css('display', 'none');
+$('#listContainer').css('display', 'none');
+$('#frontText').css('display', 'none');
+$('#footer').css('display', 'none');
+$('#notification').html('Bot has applied');
+$('#notification').css('color', 'white');
+$('#notification1').html('______Base Bet______  _____Target Balance___ ____Stop Lost Balance_');
+$('#notification1').css('color', 'white');
+$('#static').html('...');
+$('.inputBox input')['css']('background', 'none');
+$('.inputBox input')['css']('border', '1px solid white');
+$('.inputBox input')['css']('-webkit-box-shadow', 'none');
+document.getElementById('chart').hidden = true;
+document.getElementById('static').hidden = true;
+randomizeSeed();
+console.clear();
+var run = false;
+hideChart = true;
+hideStatic = true;
+sbalance = parseFloat(document.getElementById('balance').value);
+basebetAmount = 0;
+betAmount = 0;
+maxbetAmount = 0;
+prediction = 3;
+direction = 'under';
+chance = 0;
+winstreak = 0;
+multonwin = 0;
+losestreak = 0;
+multonlose = 0;
+chanceMax = 0;
+chanceMin = 0;
+balance = 0;
+overBalance = 0;
+underBalance = 0;
+bet = 0;
+win = 0;
+lose = 0;
+winStreak = 0;
+loseStreak = 0;
+maxWinStreak = 0;
+maxLoseStreak = 0;
+wagered = 0;
+profitWagered = 0;
+profit = 0;
+profitt = 0;
+largestProfit = 0;
+startTime = new Date();
+onTime = 0;
+playTime = 0;
+playDay = 0;
+playHour = 0;
+playMinute = 0;
+playSecond = 0;
+speed = 0;
+round = 0;
+roundd = 0;
+seed = 111;
+runseed = 0;
+changeseed = Math.floor(10);
+dsp = [];
+chart = '';
+color = '';
+maxloseAmount = 0;
+loseAmount = 0;
+largestBalance = 0;
+loseloseAmount = 0;
+maxloseloseAmount = 0;
+maxbetbetAmount = 0;
+n = 0;
+mult = 0;
+minratio=0;
+maxratio=0;
+over=0;
+under=0;
+remloseStreak=0;
+bbalance=0;
+resultNumber=0;
+x=0;
+$.getScript('https://canvasjs.com/assets/script/canvasjs.min.js').done(function (script, textStatus) {
+        dps = [{
+        x: 0,
+        y: 0
+    }], chart = new CanvasJS.Chart('chart', {
+                        backgroundColor: "transparent",
+			theme: 'light2',
+			zoomEnabled: true,
+			axisX: {
+				title: 'Bet',
+                                //titleFontColor: "blue",
+				includeZero: false,
+			},
+			axisY: {
+				title: 'Profit',
+                                //titleFontColor: "blue",
+				includeZero: false,
+			},
+			title: {
+				text: '',
+				fontColor: 'white',
+				fontSize: 2e1,
+				padding: 2e1
+			},
+			data: [{
+				type: 'line',
+				dataPoints: dps
+				}
+			]
+		});
+	chart.render();
+});
+function updateChart(bet, profit, color) {
+	dps.push({
+		x: bet,
+		y: profit,
+		color: color
+	});
+	if (dps[dps.length - 2]) {
+		dps[dps.length - 2].lineColor = color;
+	}
+	if (dps.length > 1e3) {
+		dps.shift();
+	}
+	chart.render();
+}
+function min() {
+	$('#basebetAmount').val((0.00000001).toFixed(8));
+}
+
+function chngdirection() {
+				
+				if(document.getElementById('dOver').checked)
+					direction='over';
+				else
+					direction='under';
+			
+}
+$('#play').on('click', function () {
+	run == true ? play(this, "Start", false, false) : play(this, "Stop", true, true);
+	basebetAmount = parseFloat($('#basebetAmount').val());
+	overBalance = parseFloat($('#overBalance').val());
+	underBalance = parseFloat($('#underBalance').val());
+	betAmount = basebetAmount;
+	$('#basebetAmount').val(basebetAmount.toFixed(8));
+	$('#overBalance').val(overBalance.toFixed(8));
+	$('#underBalance').val(underBalance.toFixed(8));
+	$('#winstreak').val(Math.floor(winstreak));
+	$('#multonwin').val(multonwin.toFixed(2));
+	$('#loseStreak').val(Math.floor(loseStreak));
+	$('#multonlose').val(multonlose.toFixed(2));
+	$('#minchance').val(prediction);
+	
+	doBet();
+});
+function play(e, d, v) {
+	$(e).html(d);
+	run = v;
+	$('#basebetAmount').prop('disabled', v);
+	$('#overBalance').prop('disabled', v);
+	$('#underBalance').prop('disabled', v);
+	$('#min').prop('disabled', v);
+	$('#reset').prop('disabled', v);
+}
+$('#showChart').on('click', function () {
+	hideChart == true ? showChart(this, "Hide Chart", false) : showChart(this, "Show Chart", true);
+});
+function showChart(e, d, v) {
+	$(e).html(d);
+	hideChart = v;
+	document.getElementById('chart').hidden = v;
+}
+$('#showStatic').on('click', function () {
+	hideStatic == true ? showStatic(this, "Hide Static", false) : showStatic(this, "Show Static", true);
+});
+function showStatic(e, d, v) {
+	$(e).html(d);
+	hideStatic = v;
+	document.getElementById('static').hidden = v;
+}
+function reset() {
+	randomizeSeed();
+        sbalance = parseFloat(document.getElementById('balance').value);
+	basebetAmount = 0;
+	betAmount = 0;
+	maxbetAmount = 0;
+	prediction = 3;
+	direction = 'under';
+        chance = 0;
+	winstreak = 0;
+	multonwin = 0;
+	losestreak = 0;
+	multonlose = 0;
+	chanceMax = 0;
+	chanceMin = 0;
+	balance = 0;
+	overBalance = 0;
+	underBalance = 0;
+	bet = 0;
+	win = 0;
+	lose = 0;
+	winStreak = 0;
+	loseStreak = 0;
+	maxWinStreak = 0;
+	maxLoseStreak = 0;
+	wagered = 0;
+	profitWagered = 0;
+	profit = 0;
+        profitt = 0;
+	largestProfit = 0;
+	startTime = new Date();
+	onTime = 0;
+	playTime = 0;
+	playDay = 0;
+	playHour = 0;
+	playMinute = 0;
+	playSecond = 0;
+	speed = 0;
+	round = 0;
+        roundd = 0;
+	dsp = [];
+	chart = '';
+	color = '';
+	maxloseAmount = 0;
+	loseAmount = 0;
+	largestBalance = 0;
+	loseloseAmount = 0;
+	maxloseloseAmount = 0;
+	maxbetbetAmount = 0;
+	n = 0;
+	mult = 0;
+	minratio=0;
+	maxratio=0;
+	
+remloseStreak=0;
+bbalance=0;
+resultNumber=0;
+x=0;
+	$.getScript('https://canvasjs.com/assets/script/canvasjs.min.js').done(function (script, textStatus) {
+        dps = [{
+        x: 0,
+        y: 0
+    }], chart = new CanvasJS.Chart('chart', {
+                        backgroundColor: "transparent",
+			theme: 'light2',
+			zoomEnabled: true,
+			axisX: {
+				title: 'Bet',
+                                //titleFontColor: "blue",
+				includeZero: false,
+			},
+			axisY: {
+				title: 'Profit',
+                                //titleFontColor: "blue",
+				includeZero: false,
+			},
+			title: {
+				text: '',
+				fontColor: 'white',
+				fontSize: 2e1,
+				padding: 2e1
+			},
+			data: [{
+				type: 'line',
+				dataPoints: dps
+				}
+			]
+		});
+		chart.render();
+	});
+	$('#notification').html('Bot has reset');
+	$('#static').html('...');
+	return;
+}
+function doBet() {
+	if (run === true) {
+		jQuery.ajax({
+			url: "https://"+user.domain+"/play/",
+			type: "POST",
+			dataType: "html",
+			timeout: 6e4,
+			data: {
+				game: "dice",
+				coin: $('#coin').val(),
+				betAmount: betAmount,
+				prediction: prediction,
+				direction: direction,
+				clientSeed: $('#clientSeed').val(),
+				serverSeedHash: $('#serverSeedHash').html(),
+                                session: getCookie("SESSION"),
+                                //action: "playBet",
+				hash: user.hash
+			},
+			success: function (data) {
+				var data = JSON.parse(data);
+				if (data.result === true) {
+					bet++;
+					onTime = new Date().getTime();
+					playTime = onTime - startTime;
+					playDay = Math.floor(playTime / (1e3 * 6e1 * 6e1 * 24));
+					playHour = Math.floor((playTime % (1e3 * 6e1 * 6e1 * 24)) / (1e3 * 6e1 * 6e1));
+					playMinute = Math.floor((playTime % (1e3 * 6e1 * 6e1)) / (1e3 * 6e1));
+					playSecond = Math.floor((playTime % (1e3 * 6e1)) / 1e3);
+					speed = parseFloat((bet / playTime) * 1000);
+					balance = parseFloat(data.balance);
+					wagered += parseFloat(betAmount);
+					profit += parseFloat(data.profit);
+					profitWagered = (wagered * 0.1) / 1e2;
+					resultNumber=data.resultNumber;
+                                        profitt = 100*(balance-sbalance)/sbalance;
+					if (profit >= largestProfit) {
+						largestProfit = profit;
+					}
+					if (balance >= largestBalance) {
+						largestBalance = balance;
+					}
+					if (data.gameResult === 'win') {
+					if (prediction === 3 && resultNumber === 0 && data.gameResult === 'win') { 
+							$('#clientSeed').val('00000000000000001111111111111111');				
+						} 
+						win++;
+						winStreak++;
+						loseStreak = 0;
+						color = 'green';
+					} else {
+						lose++;
+						loseStreak++;
+
+						winStreak = 0;
+						color = 'red';
+					}
+					if(resultNumber>50)
+					over++;
+					else
+					under++;
+
+
+					minratio=((lose/win)*5).toFixed(8);
+					maxratio=((lose/win)*20).toFixed(8);
+					if (winStreak >= maxWinStreak) {
+						maxWinStreak = winStreak;
+					}
+					if (loseStreak >= maxLoseStreak) {
+						maxLoseStreak = loseStreak;
+					}
+					if (betAmount >= maxbetAmount) {
+						maxbetAmount = betAmount;
+					}
+					loseAmount = largestProfit - profit;
+					if (loseAmount >= maxloseAmount) {
+						maxloseAmount = loseAmount;
+					}
+					
+					$('#bot-game')['text'](user['game']['toUpperCase']());
+                    $('#bot-time')['text'](playDay + ':' + playHour + ':' + playMinute + ':' + playSecond);
+                    $('#bot-speed')['text'](speed['toFixed'](2));
+                    $('#bot-balance')['text'](balance['toFixed'](8));
+                    $('#bot-profit')['text'](profit['toFixed'](8) + ' (' + profitt['toFixed'](2) + '%)');
+                    $('#bot-wagered')['text'](wagered['toFixed'](8));
+                    $('#bot-max-bet')['text'](maxbetAmount['toFixed'](8));
+                    $('#bot-win-streak')['text'](winStreak);
+                    $('#bot-lose-streak')['text'](loseStreak);
+                    $('#bot-max-win-streak')['text'](maxWinStreak);
+                    $('#bot-max-lose-streak')['text'](maxLoseStreak);
+                    $('#betAmount')['val'](betAmount['toFixed'](8));
+                    $('#prediction')['val'](prediction);
+                    if (direction === 'under') {
+                        $('#rollUnder')['click']()
+                    } else {
+                        $('#rollOver')['click']()
+                    };
+                    if (data.result == 'win') {
+                        $('#resultNumber')['css']('color', '#2eab5b')
+                    } else {
+                        $('#resultNumber')['css']('color', '#ab2e40')
+                    };
+					$('#currentWagered')['html'](wagered['toFixed'](8));
+                    $('#currentProfit')['html'](profit['toFixed'](8));
+                    if (profit < 0) {
+                        $('#currentProfit')['css']('color', '#ab2e40')
+                    } else {
+                        $('#currentProfit')['css']('color', '#2eab5b')
+                    };
+					$('#currentBets')['html'](bet);
+					$('#currentWins')['html'](win);
+                    $('#currentLosses')['html'](lose);
+                    $('#currentLuck')['html'](profitt['toFixed'](2));
+                    if (profit < 0) {
+                        $('#currentLuck')['css']('color', '#ab2e40')
+                    } else {
+                        $('#currentLuck')['css']('color', '#2eab5b')
+                    };
+                    $('#currentMaxBet')['html'](maxbetAmount['toFixed'](8));
+                    $('#currentMaxProfit')['html'](largestProfittt['toFixed'](8));
+					
+					loseloseAmount = (loseAmount/largestBalance)*100;
+					maxloseloseAmount = (maxloseAmount/largestBalance)*100;
+					maxbetbetAmount = (maxbetAmount/largestBalance)*100;
+					$('#serverSeedHash').html(data.serverSeedHash);
+					//$('#notification').html('Bot on running:   ' + prediction + ' : ' + direction);
+                                        $('#notification').html('Automatic Bot - Strategy 3 Hunter');
+					
+					updateChart(bet, profit, color);
+					if (betAmount >= balance) {
+						stop();
+						$('#notification').html('You lose');
+						return;
+					} else {
+						if (overBalance != 0 && balance >= overBalance) {
+							stop();
+							$('#notification').html('Over balance - Target Balance achieved!');
+							return;
+						} else if (underBalance != 0 && balance <= underBalance) {
+							stop();
+							$('#notification').html('Under balance - balance under Stop Lost Balance!');
+							return;
+						} else {
+					
+				             if (profit >= largestProfit) {
+								betAmount = basebetAmount;
+								round = 0;
+								direction='under';
+								prediction=3;
+								roundd = 0;
+						} else {
+
+							round++;
+							if(round%5===0){
+							   if(over>under){
+								direction='under';
+								prediction=3;
+					chance=99-prediction;
+								}
+		  					   else{
+								direction='under';
+								prediction=3;							
+								chance=prediction;
+								}
+							}	
+				betAmount=loseAmount/(96/6-1);
+	
+	                if (loseStreak === 7) {	
+                            $(".sidebarText")[1].children[0].click();
+                                     }	
+ 
+					      		if (loseStreak > 11){
+                             var clientSeed = Math.floor(Math.random() * 2 - 0 + 1) + 0;
+                                switch (clientSeed) {
+                                    case 0:
+                                        $('#clientSeed')['val']('1465da12354886b5198e1b77c993f927');
+                                        break;
+                                    case 1:
+                                        $('#clientSeed').val('1465da12354886b5198e1b77c993f927');
+                                        break;
+									case 2:
+                                        $('#clientSeed').val('1465da12354886b5198e1b77c993f927');
+                                        break;
+								
+                                        default:
+                                };		
+     
+                             }
+							
+						}
+					}
+				}
+					$('#static').html('<BR><span style="float: center;">Prediction : Direction = ' + prediction + ' : ' + direction + '</span><br><span style="float: center;">Result Dice : = ' + resultNumber + '</span><br><span style="float: center;">Play Time = ' + playDay + ':' + playHour + ':' + playMinute + ':' + playSecond + '</span><BR><span style="float: center;">Coin = &nbsp&nbsp<b><font style="margin: -10px; font-size: 25px; color: red">' + $('#coin')['val']() + '</span></font></b><BR><span style="float: center;">Balance = ' + balance.toFixed(8) + '</span><BR><span style="float: center;" ></span>&nbsp<b><font style="margin: -10px; font-size: 50px; color: #FFFFFF;">Profit = </font></b>&nbsp<font style="margin: -10px; font-size: 50px; color: #22d322;">' + profit.toFixed(8) + ' <h0 style="margin: 0px; color: Green;">(' + profitt['toFixed'](2) + '%)</h0></span></font></b>');
+					if(betAmount<=0.00000001)
+					betAmount=0.00000001;
+					doBet();
+				} else {
+					randomizeSeed();
+					setInterval(doBet(), 5000);
+				}
+			},
+			error: function (xhr, ajaxOptions, throwagerednError) {
+				randomizeSeed();
+				setInterval(doBet(), 5000);
+			},
+			timeout: function (xhr, ajaxOptions, throwagerednError) {
+				randomizeSeed();
+				setInterval(doBet(), 5000);
+			},
+			abetort: function (xhr, ajaxOptions, throwagerednError) {
+				randomizeSeed();
+				setInterval(doBet(), 5000);
+			}
+		});
+	} else {
+		$('#notification').html('Bot has stopped');
+		return;
+	}
+}
